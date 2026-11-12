@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.next/
+coverage/
+docs/
+.ai-local/
+.agents/
+.codex/agents/
+frontend/next-env.d.ts
+

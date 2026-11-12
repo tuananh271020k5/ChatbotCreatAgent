@@ -25,6 +25,7 @@ Không bắt buộc dùng CodeGraph cho thay đổi thuần tài liệu/cấu h�
 - Giữ TypeScript ở chế độ chặt chẽ; không dùng `any` nếu có thể mô hình hóa kiểu dữ liệu.
 - Tách rõ ranh giới backend, frontend và package dùng chung; không import ngược qua các ranh giới kiến trúc.
 - Sau khi thêm hoặc đổi import, chạy `npm run check:boundaries`; provider SDK chỉ được import trong adapter, không import trực tiếp từ domain.
+- Trước khi bàn giao một commit hoàn chỉnh, chạy `npm run quality`; đây là cổng kiểm tra giống CI cho format, lint, typecheck, test, boundary và build.
 - Không đưa secret vào mã nguồn. Chỉ commit file mẫu như `.env.example`.
 - Không chỉnh sửa hoặc xóa thay đổi sẵn có của người dùng nếu không thuộc yêu cầu hiện tại.
 - Nội dung commit phải viết bằng tiếng Việt và mỗi commit chỉ nên có một mục đích rõ ràng.

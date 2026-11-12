@@ -7,7 +7,8 @@
     "start": "node dist/main.js",
     "start:dev": "tsx watch src/main.ts",
     "typecheck": "tsc --noEmit",
-    "test": "node -e \"console.log('API tests are not configured yet')\""
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@agent-builder/contracts": "0.1.0",
@@ -18,8 +19,10 @@
     "rxjs": "^7.8.2"
   },
   "devDependencies": {
+    "@nestjs/testing": "^12.4.2",
     "@types/node": "^22.0.0",
     "tsx": "^4.20.6",
-    "typescript": "~5.9.3"
+    "typescript": "~5.9.3",
+    "vitest": "^5.1.0"
   }
 }

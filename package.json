@@ -25,15 +25,23 @@
     "docker:logs": "docker compose -f deployment/compose.yaml logs -f",
     "check:boundaries": "node scripts/check-import-boundaries.mjs",
     "test:boundaries": "node scripts/test-import-boundaries.mjs",
+    "lint": "eslint . --max-warnings=0",
     "prebuild": "npm run check:boundaries",
     "build": "npm run build --workspace @agent-builder/contracts && npm run build --workspace @agent-builder/backend && npm run build --workspace @agent-builder/frontend",
     "typecheck": "npm run typecheck --workspaces --if-present",
-    "test": "npm run test --workspaces --if-present",
+    "test": "npm run test:boundaries && npm run test --workspaces --if-present",
+    "quality": "npm run ai:check && npm run format:check && npm run lint && npm run typecheck && npm run test && npm run build",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.14.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17.14.0",
     "prettier": "^3.6.2",
-    "typescript": "~5.9.3"
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.72.2",
+    "vite": "^8.3.8"
   }
 }

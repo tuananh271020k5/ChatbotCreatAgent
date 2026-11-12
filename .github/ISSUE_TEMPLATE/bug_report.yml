@@ -1,0 +1,29 @@
+name: Báo lỗi
+description: Ghi nhận lỗi có thể tái hiện mà không chứa dữ liệu nhạy cảm
+title: '[Lỗi]: '
+labels: [bug]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Hiện tượng
+      description: Mô tả kết quả thực tế và kết quả mong đợi.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Các bước tái hiện
+      description: Không dán token, secret, thông tin đăng nhập hoặc dữ liệu cá nhân.
+    validations:
+      required: true
+  - type: input
+    id: commit
+    attributes:
+      label: Commit hoặc phiên bản
+      placeholder: Ví dụ 1a2b3c4
+  - type: textarea
+    id: logs
+    attributes:
+      label: Log đã loại dữ liệu nhạy cảm
+      render: shell
