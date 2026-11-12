@@ -13,3 +13,7 @@ Thumbs.db
 # Tài liệu thiết kế và kế hoạch hệ thống chỉ lưu cục bộ
 docs/
 
+# Cấu hình AI mang tính cá nhân hoặc chứa quyền cục bộ
+.claude/settings.local.json
+CLAUDE.local.md
+

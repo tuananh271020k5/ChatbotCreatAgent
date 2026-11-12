@@ -12,6 +12,8 @@
     "npm": ">=10.0.0"
   },
   "scripts": {
+    "ai:sync": "node scripts/sync-ai-config.mjs",
+    "ai:check": "node scripts/sync-ai-config.mjs --check",
     "dev:api": "npm run start:dev --workspace @agent-builder/api",
     "dev:web": "npm run dev --workspace @agent-builder/web",
     "build": "npm run build --workspaces --if-present",
