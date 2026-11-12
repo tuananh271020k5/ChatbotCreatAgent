@@ -7,6 +7,7 @@
 - `.npmrc` bật `engine-strict`, vì vậy phiên bản ngoài dải `engines` phải dừng thay vì âm thầm cài dependency.
 - Dùng `npm ci` cho checkout sạch, CI và kiểm tra tái lập. Chỉ dùng `npm install` khi chủ động thay dependency và phải commit `package.json` cùng `package-lock.json`.
 - Không sửa tay dependency tree trong lockfile. Thay đổi metadata workspace chỉ được chấp nhận sau khi npm sinh lại và cài sạch không làm lockfile đổi thêm.
+- Luôn chạy build từ root bằng `npm run build`; script này build `@agent-builder/contracts` trước backend/frontend. Không gọi `npm run build --workspaces` trực tiếp vì thứ tự workspace không thể hiện dependency graph mong muốn.
 
 Kiểm tra cài sạch:
 
