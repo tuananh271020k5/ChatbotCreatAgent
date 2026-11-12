@@ -17,3 +17,6 @@ docs/
 .claude/settings.local.json
 CLAUDE.local.md
 
+# Trạng thái bàn giao cục bộ giữa các AI, không đẩy lên Git
+.ai-local/
+

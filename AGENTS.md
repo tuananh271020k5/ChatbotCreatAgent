@@ -36,3 +36,11 @@ Không bắt buộc dùng CodeGraph cho thay đổi thuần tài liệu/cấu h�
 - Chạy `npm run ai:sync` sau khi thay đổi nguồn chuẩn.
 - `.agents/skills/`, `.agents/rules/` và `.codex/agents/` là đầu ra sinh tự động; không chỉnh sửa thủ công.
 - Chạy `npm run ai:check` để phát hiện cấu hình sinh tự động bị lệch trước khi commit.
+
+## Bàn giao công việc giữa các AI
+
+- `.ai-local/CURRENT_TASK.md` là checkpoint cục bộ để Codex, Claude và Antigravity tiếp tục cùng một công việc; file này không được commit.
+- Khi người dùng yêu cầu bàn giao, chuyển AI hoặc tiếp tục công việc đang dở, dùng skill `handoff` để ghi hoặc đọc checkpoint.
+- Trước khi tiếp tục, đối chiếu branch, commit nền, `git status` và thay đổi thực tế. Code và Git luôn có độ ưu tiên cao hơn checkpoint nếu thông tin lệch nhau.
+- Chỉ cập nhật checkpoint khi người dùng yêu cầu hoặc sau một mốc công việc có ý nghĩa; không làm gián đoạn việc code để cập nhật sau từng thao tác nhỏ.
+- Không ghi secret, token, credential hoặc log dài vào checkpoint.
