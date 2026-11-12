@@ -10,3 +10,6 @@ coverage/
 .DS_Store
 Thumbs.db
 
+# Tài liệu thiết kế và kế hoạch hệ thống chỉ lưu cục bộ
+docs/
+

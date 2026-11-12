@@ -36,11 +36,3 @@ npm run dev:web
 
 - Web: `http://localhost:3000`
 - API base: `http://localhost:3001/api` (chưa khai báo endpoint)
-
-## Tài liệu
-
-- [Kiến trúc](docs/ARCHITECTURE.md)
-- [Kế hoạch triển khai](docs/IMPLEMENTATION_PLAN.md)
-- [API contract](docs/API.md)
-- [Mô hình dữ liệu](docs/DATA_MODEL.md)
-- [Chiến lược kiểm thử](docs/TESTING.md)
