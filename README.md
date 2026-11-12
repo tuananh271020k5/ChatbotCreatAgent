@@ -42,6 +42,19 @@ Hành trình tổng quát: chủ sở hữu chuẩn bị môi trường và chí
 và test draft → người duyệt quyết định phiên bản → người chạy thực thi → hệ thống lưu
 lịch sử, audit và số liệu vận hành.
 
+## Quyết định kiến trúc nền tảng
+
+Kiến trúc mặc định đã được chấp thuận theo hướng Docker-first modular monolith:
+
+- `backend` là NestJS modular monolith, giữ domain và transaction trong một ranh giới triển khai ở giai đoạn đầu.
+- `frontend` là ứng dụng Next.js độc lập và không thực thi validation, permission hoặc workflow runtime thay backend.
+- Workflow worker được tách thành process/container khi runtime cần, nhưng tái sử dụng domain package thay vì sao chép logic hoặc tách microservice sớm.
+- PostgreSQL là system of record cho cấu hình, version, execution và audit; Redis chỉ phục vụ cache/queue và không phải nguồn phục hồi dữ liệu.
+- Model, MCP, identity, object storage và dịch vụ ngoài được truy cập qua interface/adapter; domain không phụ thuộc trực tiếp một provider SDK.
+- Dockerfile và Compose tập trung trong `deployment`; local ưu tiên chỉ cần Git và Docker, còn production ban đầu theo mô hình single-host.
+
+Chỉ xem xét tách service hoặc bổ sung Python worker khi có bằng chứng về nhu cầu mở rộng độc lập, cô lập lỗi/bảo mật, workload Python chuyên biệt hoặc bottleneck đã đo được.
+
 ## Phạm vi hiện tại
 
 Repository này mới chỉ chứa khung kỹ thuật:
