@@ -32,6 +32,8 @@ git pull --ff-only
 
 Mỗi commit chỉ giải quyết một mục tiêu review được. Implementation, test liên quan, migration và thay đổi contract/public documentation cần thiết phải đi cùng task; không tạo commit cố ý chứa code chưa chạy được.
 
+Trước khi triển khai, dùng [TASK_TEMPLATE.md](TASK_TEMPLATE.md) để chốt đầu vào, đầu ra, phụ thuộc, xử lý lỗi, bảo mật, kiểm thử và rollback. Đây là checklist làm việc; không bắt buộc tạo một file mới cho từng task.
+
 Trước commit:
 
 ```powershell

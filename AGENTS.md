@@ -36,6 +36,7 @@ Không bắt buộc dùng CodeGraph cho thay đổi thuần tài liệu/cấu h�
 - Tên nhánh và commit không chứa mã kế hoạch như `P00` hoặc `T01`; các mã này chỉ dùng trong kế hoạch cục bộ.
 - Khi người dùng nhắn `tiếp`, hiểu rằng họ đã commit/push task trước và muốn làm task kế tiếp. Luôn xác minh Git thực tế; nếu worktree chưa sạch, commit chưa tồn tại hoặc sai nhánh thì báo rõ trước khi làm.
 - Mỗi task tương ứng một commit nguyên tử. Sau khi hoàn thành, đưa lệnh stage đúng file, commit tiếng Việt và push; không tự chạy nếu người dùng chưa yêu cầu.
+- Trước khi triển khai task, dùng `TASK_TEMPLATE.md` như checklist để xác định input, output, dependencies, lỗi, bảo mật, test và rollback; không tạo file task riêng nếu không mang lại giá trị lâu dài.
 
 ## Cấu hình dùng chung cho AI
 
