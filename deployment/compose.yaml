@@ -1,0 +1,89 @@
+name: ai-agent-builder
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-agent_builder}
+      POSTGRES_USER: ${POSTGRES_USER:-agent_builder}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-agent_builder}
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ../database/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'pg_isready -U ${POSTGRES_USER:-agent_builder} -d ${POSTGRES_DB:-agent_builder}',
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - agent_builder
+
+  redis:
+    image: redis:7.4-alpine
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - agent_builder
+
+  backend:
+    build:
+      context: ..
+      dockerfile: deployment/docker/backend.Dockerfile
+      target: production
+    restart: unless-stopped
+    init: true
+    environment:
+      NODE_ENV: production
+      API_PORT: 3001
+      DATABASE_URL: postgresql://${POSTGRES_USER:-agent_builder}:${POSTGRES_PASSWORD:-agent_builder}@postgres:5432/${POSTGRES_DB:-agent_builder}
+      REDIS_URL: redis://redis:6379
+    ports:
+      - '${API_PORT:-3001}:3001'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - agent_builder
+
+  frontend:
+    build:
+      context: ..
+      dockerfile: deployment/docker/frontend.Dockerfile
+      target: production
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3001/api}
+    restart: unless-stopped
+    init: true
+    environment:
+      NODE_ENV: production
+    ports:
+      - '${WEB_PORT:-3000}:3000'
+    depends_on:
+      - backend
+    networks:
+      - agent_builder
+
+networks:
+  agent_builder:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:

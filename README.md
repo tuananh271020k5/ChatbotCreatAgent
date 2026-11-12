@@ -7,10 +7,11 @@ Base monorepo cho nền tảng **AI Agent Builder** (build-time) và **Workflow 
 
 Repository này mới chỉ chứa khung kỹ thuật:
 
-- `apps/api`: ứng dụng NestJS tối thiểu, chưa có API nghiệp vụ.
-- `apps/web`: ứng dụng Next.js tối thiểu, chưa có Visual Workflow Builder.
+- `backend`: ứng dụng NestJS tối thiểu, chưa có API nghiệp vụ.
+- `frontend`: ứng dụng Next.js tối thiểu, chưa có Visual Workflow Builder.
 - `packages/contracts`: vị trí dành cho contract dùng chung, hiện chưa định nghĩa domain.
-- `docs`: ranh giới module và quyết định kiến trúc nền tảng.
+- `database/init`: nơi dành cho script bootstrap PostgreSQL khi thực sự cần.
+- `deployment`: Dockerfile và Docker Compose cho môi trường development/production.
 
 Chưa có Model Gateway, LLM call, MCP client, RAG, Workflow Engine, authentication,
 database, Redis hay logic triển khai Agent.
@@ -25,14 +26,33 @@ database, Redis hay logic triển khai Agent.
 ```bash
 npm install
 copy .env.example .env
-npm run dev:api
+npm run dev:backend
 ```
 
 Mở terminal khác:
 
 ```bash
-npm run dev:web
+npm run dev:frontend
 ```
 
 - Web: `http://localhost:3000`
 - API base: `http://localhost:3001/api` (chưa khai báo endpoint)
+
+## Khởi động bằng Docker
+
+```bash
+copy .env.example .env
+npm run docker:dev
+```
+
+Chạy cấu hình gần production ở chế độ nền:
+
+```bash
+npm run docker:up
+```
+
+Dừng stack:
+
+```bash
+npm run docker:down
+```

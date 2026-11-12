@@ -1,5 +1,5 @@
 {
-  "name": "@agent-builder/web",
+  "name": "@agent-builder/frontend",
   "version": "0.1.0",
   "private": true,
   "scripts": {

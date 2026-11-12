@@ -4,7 +4,8 @@
   "private": true,
   "description": "Base monorepo for the AI Agent Builder and Workflow Engine platform.",
   "workspaces": [
-    "apps/*",
+    "backend",
+    "frontend",
     "packages/*"
   ],
   "engines": {
@@ -14,8 +15,13 @@
   "scripts": {
     "ai:sync": "node scripts/sync-ai-config.mjs",
     "ai:check": "node scripts/sync-ai-config.mjs --check",
-    "dev:api": "npm run start:dev --workspace @agent-builder/api",
-    "dev:web": "npm run dev --workspace @agent-builder/web",
+    "dev:backend": "npm run start:dev --workspace @agent-builder/backend",
+    "dev:frontend": "npm run dev --workspace @agent-builder/frontend",
+    "docker:config": "docker compose -f deployment/compose.yaml config",
+    "docker:up": "docker compose -f deployment/compose.yaml up -d --build",
+    "docker:dev": "docker compose -f deployment/compose.yaml -f deployment/compose.dev.yaml up --build",
+    "docker:down": "docker compose -f deployment/compose.yaml down",
+    "docker:logs": "docker compose -f deployment/compose.yaml logs -f",
     "build": "npm run build --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",

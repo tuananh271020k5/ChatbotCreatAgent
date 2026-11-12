@@ -3,8 +3,9 @@
 ## Phạm vi dự án
 
 - Monorepo TypeScript dùng npm workspaces.
-- Backend nằm trong `apps/api`, frontend nằm trong `apps/web`.
+- Backend NestJS nằm trong `backend`, frontend Next.js nằm trong `frontend`.
 - Các package dùng chung nằm trong `packages`.
+- Hạ tầng Docker và cấu hình triển khai nằm trong `deployment`.
 - Chỉ triển khai tính năng khi người dùng yêu cầu; giữ thay đổi nhỏ, có thể kiểm chứng và không đụng vào phần không liên quan.
 
 ## Quy trình phân tích mã nguồn

@@ -1,0 +1,29 @@
+services:
+  backend:
+    build:
+      target: development
+    command: npm run dev:backend
+    environment:
+      NODE_ENV: development
+    volumes:
+      - ..:/workspace
+      - backend_node_modules:/workspace/node_modules
+      - backend_dist:/workspace/backend/dist
+
+  frontend:
+    build:
+      target: development
+    command: npm run dev:frontend
+    environment:
+      NODE_ENV: development
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3001/api}
+    volumes:
+      - ..:/workspace
+      - frontend_node_modules:/workspace/node_modules
+      - frontend_next:/workspace/frontend/.next
+
+volumes:
+  backend_node_modules:
+  backend_dist:
+  frontend_node_modules:
+  frontend_next:
