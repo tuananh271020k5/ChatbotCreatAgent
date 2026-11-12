@@ -1,5 +1,22 @@
 # Quy trình đóng góp
 
+## Toolchain và lockfile
+
+- Bản chuẩn cho máy mới/CI là Node `22.23.5` và npm `10.9.9`.
+- `.nvmrc` và `.node-version` chốt Node; trường `packageManager` trong `package.json` chốt npm.
+- `.npmrc` bật `engine-strict`, vì vậy phiên bản ngoài dải `engines` phải dừng thay vì âm thầm cài dependency.
+- Dùng `npm ci` cho checkout sạch, CI và kiểm tra tái lập. Chỉ dùng `npm install` khi chủ động thay dependency và phải commit `package.json` cùng `package-lock.json`.
+- Không sửa tay dependency tree trong lockfile. Thay đổi metadata workspace chỉ được chấp nhận sau khi npm sinh lại và cài sạch không làm lockfile đổi thêm.
+
+Kiểm tra cài sạch:
+
+```powershell
+node --version
+npm --version
+npm ci
+git diff --exit-code -- package-lock.json
+```
+
 ## Nguyên tắc nhánh
 
 - `main` chỉ chứa phase đã nghiệm thu; không commit trực tiếp lên `main`.

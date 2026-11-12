@@ -70,8 +70,11 @@ database, Redis hay logic triển khai Agent.
 
 ## Yêu cầu môi trường
 
-- Node.js `>= 20.9`
-- npm `>= 10`
+- Node.js `22.23.5` được khuyến nghị qua `.nvmrc`/`.node-version`; dải tương thích tạm thời là `>=22.19.0 <23`.
+- npm `10.9.9` là bản chuẩn; dải tương thích tạm thời là `>=10.9.3 <11`.
+- Docker Engine/Desktop có Docker Compose plugin nếu chạy bằng container.
+
+Node 22 hết vòng đời hỗ trợ vào ngày 30/04/2027; cần nâng major đã kiểm thử trước mốc này.
 
 ## Khởi động base
 
