@@ -30,6 +30,13 @@ Không bắt buộc dùng CodeGraph cho thay đổi thuần tài liệu/cấu h�
 - Không tự commit hoặc push nếu người dùng chưa yêu cầu.
 - Thư mục `docs/` là tài liệu cục bộ, đang bị Git bỏ qua và không được dùng như đầu vào bắt buộc của bản build.
 
+## Quy trình task và nhánh
+
+- Trước task mới, kiểm tra nhánh hiện tại và các nhánh đã có. Nhắc người dùng chuyển sang nhánh phase đã tồn tại; chỉ nhắc tạo nhánh khi phase chưa có nhánh.
+- Tên nhánh và commit không chứa mã kế hoạch như `P00` hoặc `T01`; các mã này chỉ dùng trong kế hoạch cục bộ.
+- Khi người dùng nhắn `tiếp`, hiểu rằng họ đã commit/push task trước và muốn làm task kế tiếp. Luôn xác minh Git thực tế; nếu worktree chưa sạch, commit chưa tồn tại hoặc sai nhánh thì báo rõ trước khi làm.
+- Mỗi task tương ứng một commit nguyên tử. Sau khi hoàn thành, đưa lệnh stage đúng file, commit tiếng Việt và push; không tự chạy nếu người dùng chưa yêu cầu.
+
 ## Cấu hình dùng chung cho AI
 
 - `AGENTS.md` là nguồn chuẩn cho chỉ dẫn cấp dự án. Claude nạp file này qua `CLAUDE.md`; Codex và Antigravity đọc trực tiếp.

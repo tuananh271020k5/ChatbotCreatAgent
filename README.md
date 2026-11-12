@@ -108,3 +108,8 @@ Dừng stack:
 ```bash
 npm run docker:down
 ```
+
+## Đóng góp và quy trình Git
+
+Xem [CONTRIBUTING.md](CONTRIBUTING.md) để chọn nhánh, tạo commit tiếng Việt, kiểm tra
+thay đổi và push từng task.
