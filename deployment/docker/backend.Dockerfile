@@ -1,16 +1,21 @@
 # syntax=docker/dockerfile:1.7
 
-FROM node:22-alpine AS dependencies
+ARG NODE_VERSION=22.23.5
+
+FROM node:${NODE_VERSION}-alpine AS dependencies
 WORKDIR /workspace
 
 COPY package.json package-lock.json ./
 COPY backend/package.json ./backend/package.json
 COPY frontend/package.json ./frontend/package.json
 COPY packages/contracts/package.json ./packages/contracts/package.json
-RUN npm ci
+RUN --mount=type=cache,target=/root/.npm npm ci --no-audit --no-fund
 
 FROM dependencies AS development
-COPY . .
+RUN mkdir -p /workspace/backend/dist /workspace/frontend/.next /workspace/node_modules/.vitest-cache \
+  && chown node:node /workspace /workspace/backend/dist /workspace/frontend/.next /workspace/node_modules/.vitest-cache
+COPY --chown=node:node . .
+USER node
 CMD ["npm", "run", "dev:backend"]
 
 FROM dependencies AS build
@@ -19,7 +24,7 @@ RUN npm run build --workspace @agent-builder/contracts \
   && npm run build --workspace @agent-builder/backend \
   && npm prune --omit=dev
 
-FROM node:22-alpine AS production
+FROM node:${NODE_VERSION}-alpine AS production
 ENV NODE_ENV=production
 WORKDIR /workspace
 

@@ -5,6 +5,7 @@ services:
     command: npm run dev:backend
     environment:
       NODE_ENV: development
+      CHOKIDAR_USEPOLLING: 'true'
     volumes:
       - ..:/workspace
       - backend_node_modules:/workspace/node_modules
@@ -17,6 +18,8 @@ services:
     environment:
       NODE_ENV: development
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3001/api}
+      NEXT_TELEMETRY_DISABLED: 1
+      WATCHPACK_POLLING: 'true'
     volumes:
       - ..:/workspace
       - frontend_node_modules:/workspace/node_modules
