@@ -58,6 +58,7 @@ Trước commit:
 git branch --show-current
 git status --short
 git diff
+npm run check:boundaries # khi thêm hoặc đổi import
 # Chạy quality gate phù hợp với phạm vi task
 git add <cac-file-thuoc-task>
 git diff --cached
@@ -65,6 +66,8 @@ git diff --cached --check
 ```
 
 Không dùng `git add -A` theo thói quen khi worktree có thay đổi ngoài task.
+
+Ranh giới import được kiểm tra bằng TypeScript AST. Frontend không import backend, backend không import frontend, contracts không phụ thuộc framework ứng dụng và domain không import trực tiếp SDK provider. Khi thêm provider SDK mới, cập nhật allow/deny rule và fixture trong cùng task.
 
 ## Commit tiếng Việt
 
