@@ -1,0 +1,27 @@
+{
+  "name": "ai-agent-builder-platform",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Base monorepo for the AI Agent Builder and Workflow Engine platform.",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=20.9.0",
+    "npm": ">=10.0.0"
+  },
+  "scripts": {
+    "dev:api": "npm run start:dev --workspace @agent-builder/api",
+    "dev:web": "npm run dev --workspace @agent-builder/web",
+    "build": "npm run build --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "prettier": "^3.6.2",
+    "typescript": "~5.9.3"
+  }
+}

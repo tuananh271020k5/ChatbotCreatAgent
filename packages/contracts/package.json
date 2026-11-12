@@ -1,0 +1,16 @@
+{
+  "name": "@agent-builder/contracts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit",
+    "test": "node -e \"console.log('Contract tests are not configured yet')\""
+  },
+  "devDependencies": {
+    "typescript": "~5.9.3"
+  }
+}
