@@ -1,5 +1,11 @@
 name: ai-agent-builder
 
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: 10m
+    max-file: 3
+
 services:
   postgres:
     image: postgres:17-alpine
@@ -9,7 +15,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-agent_builder}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-agent_builder}
     ports:
-      - '5432:5432'
+      - '127.0.0.1:${POSTGRES_PORT:-5432}:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ../database/init:/docker-entrypoint-initdb.d:ro
@@ -22,14 +28,17 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+      start_period: 10s
+    logging: *default-logging
     networks:
       - agent_builder
 
   redis:
     image: redis:7.4-alpine
     restart: unless-stopped
+    command: redis-server --appendonly yes
     ports:
-      - '6379:6379'
+      - '127.0.0.1:${REDIS_PORT:-6380}:6379'
     volumes:
       - redis_data:/data
     healthcheck:
@@ -37,6 +46,8 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+      start_period: 5s
+    logging: *default-logging
     networks:
       - agent_builder
 
@@ -54,11 +65,25 @@ services:
       REDIS_URL: redis://redis:6379
     ports:
       - '${API_PORT:-3001}:3001'
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:3001/api').then(() => process.exit(0)).catch(() => process.exit(1))",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
+    logging: *default-logging
+    stop_grace_period: 15s
     networks:
       - agent_builder
 
@@ -73,12 +98,42 @@ services:
     init: true
     environment:
       NODE_ENV: production
+      NEXT_TELEMETRY_DISABLED: 1
     ports:
       - '${WEB_PORT:-3000}:3000'
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:3000').then((response) => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
+    logging: *default-logging
+    stop_grace_period: 15s
     networks:
       - agent_builder
+
+  quality:
+    profiles: [quality]
+    build:
+      context: ..
+      dockerfile: deployment/docker/backend.Dockerfile
+      target: development
+    init: true
+    command: sh -c "npm run ai:sync && npm run quality"
+    network_mode: none
+    environment:
+      CI: 'true'
+      NEXT_TELEMETRY_DISABLED: 1
+    logging: *default-logging
 
 networks:
   agent_builder:

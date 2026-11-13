@@ -95,6 +95,9 @@ npm run dev:frontend
 
 ## Khởi động bằng Docker
 
+Máy phát triển chỉ cần Git và Docker Desktop/Engine có Compose plugin; Node.js và npm
+đã được đóng gói trong image. Sao chép file môi trường rồi chạy chế độ hot reload:
+
 ```bash
 copy .env.example .env
 npm run docker:dev
@@ -111,6 +114,20 @@ Dừng stack:
 ```bash
 npm run docker:down
 ```
+
+Các lệnh Docker bổ sung:
+
+```bash
+npm run docker:config  # kiểm tra cả cấu hình production và development
+npm run docker:infra   # chỉ chạy PostgreSQL và Redis để code trên host
+npm run docker:quality # chạy toàn bộ quality gate bên trong container
+npm run docker:ps      # xem trạng thái và healthcheck
+npm run docker:logs    # theo dõi log của toàn stack
+```
+
+PostgreSQL và Redis chỉ publish cổng trên `127.0.0.1`; container ứng dụng truy cập
+chúng qua network nội bộ. Dữ liệu nằm trong named volume nên vẫn còn sau
+`docker:down`. Chỉ xóa volume khi chủ động muốn mất toàn bộ dữ liệu phát triển.
 
 ## Đóng góp và quy trình Git
 

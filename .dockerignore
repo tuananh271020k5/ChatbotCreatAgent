@@ -1,9 +1,10 @@
 .git
 .codegraph
 .agents
-.claude
 .codex
 .ai-local
+.claude/settings.local.json
+CLAUDE.local.md
 docs
 *.docx
 *.xlsx
