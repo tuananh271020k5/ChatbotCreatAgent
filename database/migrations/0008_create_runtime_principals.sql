@@ -1,0 +1,18 @@
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'app_api') THEN
+    CREATE ROLE app_api NOLOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE INHERIT NOBYPASSRLS;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'app_worker') THEN
+    CREATE ROLE app_worker NOLOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE INHERIT NOBYPASSRLS;
+  END IF;
+END
+$$;
+
+GRANT app_runtime TO app_api, app_worker;
+
+DO $$
+BEGIN
+  EXECUTE format('GRANT app_api, app_worker TO %I', current_user);
+END
+$$;
