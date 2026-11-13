@@ -1,0 +1,161 @@
+name: agent-builder-test
+
+x-logging: &test-logging
+  driver: json-file
+  options:
+    max-size: 5m
+    max-file: 2
+
+services:
+  secret-bootstrap:
+    image: alpine:3.22.2
+    restart: 'no'
+    command: ['/bin/sh', '/bootstrap/bootstrap-secrets.sh']
+    volumes:
+      - ./bootstrap:/bootstrap:ro
+      - test_secrets:/secrets
+    network_mode: none
+    logging: *test-logging
+
+  postgres:
+    image: pgvector/pgvector:0.8.7-pg17-bookworm
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: agent_builder_test
+      POSTGRES_USER: platform_admin
+      POSTGRES_PASSWORD_FILE: /run/local-secrets/postgres_admin_password
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+      - ./postgres:/docker-entrypoint-initdb.d:ro
+      - test_secrets:/run/local-secrets:ro
+    depends_on:
+      secret-bootstrap:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U platform_admin -d agent_builder_test']
+      interval: 3s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+    logging: *test-logging
+    networks:
+      - test_data
+
+  redis-cache:
+    image: redis:7.4.6-alpine
+    restart: unless-stopped
+    command:
+      - redis-server
+      - --save
+      - ''
+      - --appendonly
+      - 'no'
+      - --maxmemory
+      - 64mb
+      - --maxmemory-policy
+      - allkeys-lru
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 3s
+      timeout: 2s
+      retries: 5
+    logging: *test-logging
+    networks:
+      - test_data
+
+  redis-queue:
+    image: redis:7.4.6-alpine
+    restart: unless-stopped
+    command:
+      - redis-server
+      - --appendonly
+      - 'yes'
+      - --appendfsync
+      - everysec
+      - --maxmemory-policy
+      - noeviction
+    volumes:
+      - redis_queue_test_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 3s
+      timeout: 2s
+      retries: 5
+    logging: *test-logging
+    networks:
+      - test_data
+
+  seaweedfs:
+    image: chrislusf/seaweedfs:4.53
+    restart: unless-stopped
+    command:
+      - server
+      - -dir=/data
+      - -ip=seaweedfs
+      - -ip.bind=0.0.0.0
+      - -s3
+      - -s3.config=/run/local-secrets/seaweed/seaweed-s3.json
+      - -s3.iam=false
+    volumes:
+      - seaweedfs_test_data:/data
+      - test_secrets:/run/local-secrets:ro
+    depends_on:
+      secret-bootstrap:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -q -O - http://127.0.0.1:9333/cluster/status >/dev/null']
+      interval: 3s
+      timeout: 2s
+      retries: 10
+      start_period: 5s
+    logging: *test-logging
+    networks:
+      - test_data
+
+  bucket-bootstrap:
+    image: chrislusf/seaweedfs:4.53
+    restart: 'no'
+    entrypoint: ['/bin/sh', '/bootstrap/bootstrap-buckets.sh']
+    environment:
+      S3_BUCKET_DOCUMENTS: agent-documents-test
+      S3_BUCKET_OUTPUTS: agent-outputs-test
+      S3_BUCKET_BACKUPS: agent-backups-test
+    volumes:
+      - ./storage:/bootstrap:ro
+    depends_on:
+      seaweedfs:
+        condition: service_healthy
+    logging: *test-logging
+    networks:
+      - test_data
+
+  migration:
+    image: ai-agent-builder-backend:local
+    build:
+      context: ..
+      dockerfile: deployment/docker/backend.Dockerfile
+      target: production
+    restart: 'no'
+    command: ['node', 'backend/dist/database/migrations/migrate.js']
+    environment:
+      MIGRATION_DATABASE_URL_FILE: /run/local-secrets/backend/migration_database_url
+    volumes:
+      - test_secrets:/run/local-secrets:ro
+    depends_on:
+      secret-bootstrap:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+    logging: *test-logging
+    networks:
+      - test_data
+
+networks:
+  test_data:
+    driver: bridge
+
+volumes:
+  test_secrets:
+  postgres_test_data:
+  redis_queue_test_data:
+  seaweedfs_test_data:

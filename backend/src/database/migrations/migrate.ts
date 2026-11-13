@@ -5,7 +5,10 @@ import { runMigrations } from './migration-runner';
 const defaultMigrationsDirectory = path.resolve(__dirname, '../../../../database/migrations');
 
 async function main(): Promise<void> {
-  const pool = await createDatabasePool();
+  const pool = await createDatabasePool({
+    DATABASE_URL: process.env.MIGRATION_DATABASE_URL ?? process.env.DATABASE_URL,
+    DATABASE_URL_FILE: process.env.MIGRATION_DATABASE_URL_FILE ?? process.env.DATABASE_URL_FILE,
+  });
   try {
     const result = await runMigrations(
       pool,
