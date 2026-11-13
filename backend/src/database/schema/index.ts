@@ -39,3 +39,4 @@ export {
   type MembershipStatus,
 } from './tenant-access.schema';
 export { users } from './user.schema';
+export { apiTokens, invitations, sessions } from './auth.schema';
