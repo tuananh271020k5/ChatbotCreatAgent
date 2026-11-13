@@ -1,10 +1,12 @@
 export { DatabaseModule } from './database.module';
 export { DatabaseService } from './database.service';
+export { seedDevelopmentData, type DevelopmentSeedResult } from './seeds/development-seed';
 export { DATABASE_CLIENT, DATABASE_POOL, type DatabaseClient } from './database.tokens';
 export { OptimisticLockConflictError, requireOptimisticUpdate } from './optimistic-lock';
 export {
   runInTenantTransaction,
   type AuthenticatedTenantContext,
+  type TenantRuntimePrincipal,
   type TenantTransaction,
 } from './tenant-transaction';
 export {
