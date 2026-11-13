@@ -18,6 +18,7 @@
     "ai:check": "node scripts/sync-ai-config.mjs --check",
     "dev:backend": "npm run start:dev --workspace @agent-builder/backend",
     "dev:frontend": "npm run dev --workspace @agent-builder/frontend",
+    "database:migrate": "npm run migrate --workspace @agent-builder/backend",
     "docker:config": "docker compose -f deployment/compose.yaml config --quiet && docker compose -f deployment/compose.yaml -f deployment/compose.dev.yaml config --quiet",
     "docker:infra": "docker compose -f deployment/compose.yaml up -d postgres redis",
     "docker:up": "docker compose -f deployment/compose.yaml up -d --build --remove-orphans",
