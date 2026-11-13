@@ -27,6 +27,17 @@ describe('loadMigrationFiles', () => {
     await expect(loadMigrationFiles(directory)).resolves.toEqual(migrations);
   });
 
+  it('giữ checksum giống nhau giữa LF và CRLF', async () => {
+    const migrationPath = path.join(directory, '0001_line_endings.sql');
+    await writeFile(migrationPath, 'select 1;\nselect 2;\n', 'utf8');
+    const [lfMigration] = await loadMigrationFiles(directory);
+
+    await writeFile(migrationPath, 'select 1;\r\nselect 2;\r\n', 'utf8');
+    const [crlfMigration] = await loadMigrationFiles(directory);
+
+    expect(crlfMigration?.checksum).toBe(lfMigration?.checksum);
+  });
+
   it('từ chối tên sai, thứ tự trùng và file rỗng', async () => {
     await writeFile(path.join(directory, 'migration.sql'), 'select 1;', 'utf8');
     await expect(loadMigrationFiles(directory)).rejects.toBeInstanceOf(MigrationFileError);

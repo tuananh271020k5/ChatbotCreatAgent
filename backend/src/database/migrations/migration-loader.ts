@@ -36,7 +36,8 @@ export async function loadMigrationFiles(directory: string): Promise<MigrationFi
     }
     seenSequences.add(sequence);
 
-    const sql = await readFile(path.join(directory, entry.name), 'utf8');
+    const fileContent = await readFile(path.join(directory, entry.name), 'utf8');
+    const sql = fileContent.replace(/\r\n?/g, '\n');
     if (!sql.trim()) {
       throw new MigrationFileError(`Migration không được để trống: ${entry.name}`);
     }
