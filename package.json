@@ -21,7 +21,7 @@
     "database:migrate": "npm run migrate --workspace @agent-builder/backend",
     "database:seed": "npm run seed:development --workspace @agent-builder/backend",
     "docker:config": "docker compose -f deployment/compose.yaml config --quiet && docker compose -f deployment/compose.yaml -f deployment/compose.dev.yaml config --quiet",
-    "docker:infra": "docker compose -f deployment/compose.yaml up -d postgres redis",
+    "docker:infra": "docker compose -f deployment/compose.yaml up -d --wait postgres redis-cache redis-queue seaweedfs bucket-bootstrap",
     "docker:up": "docker compose -f deployment/compose.yaml up -d --build --remove-orphans",
     "docker:dev": "docker compose -f deployment/compose.yaml -f deployment/compose.dev.yaml up --build --remove-orphans",
     "docker:quality": "docker compose -f deployment/compose.yaml --profile quality run --rm --build --no-deps quality",

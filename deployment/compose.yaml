@@ -7,24 +7,34 @@ x-logging: &default-logging
     max-file: 3
 
 services:
+  secret-bootstrap:
+    image: alpine:3.22.2
+    restart: 'no'
+    command: ['/bin/sh', '/bootstrap/bootstrap-secrets.sh']
+    volumes:
+      - ./bootstrap:/bootstrap:ro
+      - local_secrets:/secrets
+    network_mode: none
+    logging: *default-logging
+
   postgres:
-    image: postgres:17-alpine
+    image: pgvector/pgvector:0.8.7-pg17-bookworm
     restart: unless-stopped
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-agent_builder}
-      POSTGRES_USER: ${POSTGRES_USER:-agent_builder}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-agent_builder}
+      POSTGRES_USER: platform_admin
+      POSTGRES_PASSWORD_FILE: /run/local-secrets/postgres_admin_password
     ports:
       - '127.0.0.1:${POSTGRES_PORT:-5432}:5432'
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ../database/init:/docker-entrypoint-initdb.d:ro
+      - postgres_platform_data:/var/lib/postgresql/data
+      - ./postgres:/docker-entrypoint-initdb.d:ro
+      - local_secrets:/run/local-secrets:ro
+    depends_on:
+      secret-bootstrap:
+        condition: service_completed_successfully
     healthcheck:
-      test:
-        [
-          'CMD-SHELL',
-          'pg_isready -U ${POSTGRES_USER:-agent_builder} -d ${POSTGRES_DB:-agent_builder}',
-        ]
+      test: ['CMD-SHELL', 'pg_isready -U platform_admin -d ${POSTGRES_DB:-agent_builder}']
       interval: 5s
       timeout: 5s
       retries: 10
@@ -33,14 +43,21 @@ services:
     networks:
       - agent_builder
 
-  redis:
-    image: redis:7.4-alpine
+  redis-cache:
+    image: redis:7.4.6-alpine
     restart: unless-stopped
-    command: redis-server --appendonly yes
+    command:
+      - redis-server
+      - --save
+      - ''
+      - --appendonly
+      - 'no'
+      - --maxmemory
+      - ${REDIS_CACHE_MAXMEMORY:-256mb}
+      - --maxmemory-policy
+      - allkeys-lru
     ports:
-      - '127.0.0.1:${REDIS_PORT:-6380}:6379'
-    volumes:
-      - redis_data:/data
+      - '127.0.0.1:${REDIS_CACHE_PORT:-6380}:6379'
     healthcheck:
       test: ['CMD', 'redis-cli', 'ping']
       interval: 5s
@@ -51,7 +68,100 @@ services:
     networks:
       - agent_builder
 
+  redis-queue:
+    image: redis:7.4.6-alpine
+    restart: unless-stopped
+    command:
+      - redis-server
+      - --appendonly
+      - 'yes'
+      - --appendfsync
+      - everysec
+      - --maxmemory-policy
+      - noeviction
+    ports:
+      - '127.0.0.1:${REDIS_QUEUE_PORT:-6381}:6379'
+    volumes:
+      - redis_queue_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+    logging: *default-logging
+    networks:
+      - agent_builder
+
+  seaweedfs:
+    image: chrislusf/seaweedfs:4.53
+    restart: unless-stopped
+    command:
+      - server
+      - -dir=/data
+      - -ip=seaweedfs
+      - -ip.bind=0.0.0.0
+      - -s3
+      - -s3.config=/run/local-secrets/seaweed/seaweed-s3.json
+      - -s3.iam=false
+    ports:
+      - '127.0.0.1:${S3_PORT:-8333}:8333'
+    volumes:
+      - seaweedfs_data:/data
+      - local_secrets:/run/local-secrets:ro
+    depends_on:
+      secret-bootstrap:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -q -O - http://127.0.0.1:9333/cluster/status >/dev/null']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
+    logging: *default-logging
+    networks:
+      - agent_builder
+
+  bucket-bootstrap:
+    image: chrislusf/seaweedfs:4.53
+    restart: 'no'
+    entrypoint: ['/bin/sh', '/bootstrap/bootstrap-buckets.sh']
+    environment:
+      S3_BUCKET_DOCUMENTS: ${S3_BUCKET_DOCUMENTS:-agent-documents}
+      S3_BUCKET_OUTPUTS: ${S3_BUCKET_OUTPUTS:-agent-outputs}
+      S3_BUCKET_BACKUPS: ${S3_BUCKET_BACKUPS:-agent-backups}
+    volumes:
+      - ./storage:/bootstrap:ro
+    depends_on:
+      seaweedfs:
+        condition: service_healthy
+    logging: *default-logging
+    networks:
+      - agent_builder
+
+  migration:
+    image: ai-agent-builder-backend:local
+    build:
+      context: ..
+      dockerfile: deployment/docker/backend.Dockerfile
+      target: production
+    restart: 'no'
+    command: ['node', 'backend/dist/database/migrations/migrate.js']
+    environment:
+      MIGRATION_DATABASE_URL_FILE: /run/local-secrets/backend/migration_database_url
+    volumes:
+      - local_secrets:/run/local-secrets:ro
+    depends_on:
+      secret-bootstrap:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+    logging: *default-logging
+    networks:
+      - agent_builder
+
   backend:
+    image: ai-agent-builder-backend:local
     build:
       context: ..
       dockerfile: deployment/docker/backend.Dockerfile
@@ -61,8 +171,16 @@ services:
     environment:
       NODE_ENV: production
       API_PORT: 3001
-      DATABASE_URL: postgresql://${POSTGRES_USER:-agent_builder}:${POSTGRES_PASSWORD:-agent_builder}@postgres:5432/${POSTGRES_DB:-agent_builder}
-      REDIS_URL: redis://redis:6379
+      DATABASE_URL_FILE: /run/local-secrets/backend/database_url
+      CACHE_REDIS_URL: redis://redis-cache:6379
+      QUEUE_REDIS_URL: redis://redis-queue:6379
+      S3_ENDPOINT: http://seaweedfs:8333
+      S3_ACCESS_KEY_FILE: /run/local-secrets/backend/s3_access_key
+      S3_SECRET_KEY_FILE: /run/local-secrets/backend/s3_secret_key
+      S3_BUCKET_DOCUMENTS: ${S3_BUCKET_DOCUMENTS:-agent-documents}
+      S3_BUCKET_OUTPUTS: ${S3_BUCKET_OUTPUTS:-agent-outputs}
+    volumes:
+      - local_secrets:/run/local-secrets:ro
     ports:
       - '${API_PORT:-3001}:3001'
     healthcheck:
@@ -80,8 +198,14 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      redis:
+      migration:
+        condition: service_completed_successfully
+      redis-cache:
         condition: service_healthy
+      redis-queue:
+        condition: service_healthy
+      bucket-bootstrap:
+        condition: service_completed_successfully
     logging: *default-logging
     stop_grace_period: 15s
     networks:
@@ -140,5 +264,7 @@ networks:
     driver: bridge
 
 volumes:
-  postgres_data:
-  redis_data:
+  local_secrets:
+  postgres_platform_data:
+  redis_queue_data:
+  seaweedfs_data:
