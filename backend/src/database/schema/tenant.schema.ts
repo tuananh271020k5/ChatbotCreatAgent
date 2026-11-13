@@ -1,7 +1,6 @@
 import { sql } from 'drizzle-orm';
-import { check, index, pgSchema, timestamp, unique, uuid, varchar } from 'drizzle-orm/pg-core';
-
-const appSchema = pgSchema('app');
+import { check, index, timestamp, unique, uuid, varchar } from 'drizzle-orm/pg-core';
+import { appSchema } from './app.schema';
 
 export const tenantStatusValues = ['active', 'suspended', 'archived'] as const;
 export type TenantStatus = (typeof tenantStatusValues)[number];
