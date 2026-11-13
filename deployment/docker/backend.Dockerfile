@@ -33,6 +33,7 @@ COPY --from=build --chown=node:node /workspace/backend/package.json ./backend/pa
 COPY --from=build --chown=node:node /workspace/backend/dist ./backend/dist
 COPY --from=build --chown=node:node /workspace/packages/contracts/package.json ./packages/contracts/package.json
 COPY --from=build --chown=node:node /workspace/packages/contracts/dist ./packages/contracts/dist
+COPY --from=build --chown=node:node /workspace/database/migrations ./database/migrations
 
 USER node
 EXPOSE 3001
