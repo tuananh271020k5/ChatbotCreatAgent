@@ -14,6 +14,7 @@ import {
   AUTH_CSRF_COOKIE_NAME,
   AUTH_SESSION_COOKIE_NAME,
   AUTH_SESSION_TTL_MS,
+  DEFAULT_WEB_URL,
 } from './auth.constants';
 import { AuthenticationRequiredException } from './auth.errors';
 import { AuthService } from './auth.service';
@@ -43,10 +44,8 @@ export class AuthController {
     authorizationUrl: string;
     state: string;
   } {
-    const redirectUri =
-      customRedirectUri ??
-      process.env.OIDC_REDIRECT_URI ??
-      'http://localhost:3000/api/auth/callback/keycloak';
+    const defaultCallback = `${DEFAULT_WEB_URL}/api/auth/callback/keycloak`;
+    const redirectUri = customRedirectUri ?? process.env.OIDC_REDIRECT_URI ?? defaultCallback;
 
     const { url, state } = this.oidcService.createAuthorizationUrl(redirectUri);
     return { authorizationUrl: url, state };

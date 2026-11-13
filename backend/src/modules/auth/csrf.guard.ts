@@ -1,15 +1,37 @@
 import { Injectable, type CanActivate, type ExecutionContext } from '@nestjs/common';
-import { AUTH_CSRF_COOKIE_NAME, AUTH_CSRF_HEADER_NAME } from './auth.constants';
+import { AUTH_CSRF_COOKIE_NAME, AUTH_CSRF_HEADER_NAME, DEFAULT_WEB_URL } from './auth.constants';
 import { CsrfForbiddenException } from './auth.errors';
 import type { HttpRequest } from './session.guard';
 
 @Injectable()
 export class CsrfGuard implements CanActivate {
-  private readonly allowedOrigins = new Set([
-    'http://localhost:3000',
-    'http://127.0.0.1:3000',
-    process.env.WEB_URL ?? 'http://localhost:3000',
-  ]);
+  private get allowedOrigins(): Set<string> {
+    const origins = new Set<string>(['http://localhost:3000', 'http://127.0.0.1:3000']);
+
+    const configuredWebUrl = process.env.WEB_URL ?? process.env.FRONTEND_URL ?? DEFAULT_WEB_URL;
+    if (configuredWebUrl) {
+      try {
+        origins.add(new URL(configuredWebUrl).origin);
+      } catch {
+        origins.add(configuredWebUrl.replace(/\/+$/, ''));
+      }
+    }
+
+    const trustedOrigins = (process.env.CSRF_TRUSTED_ORIGINS ?? '')
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    for (const rawOrigin of trustedOrigins) {
+      try {
+        origins.add(new URL(rawOrigin).origin);
+      } catch {
+        origins.add(rawOrigin.replace(/\/+$/, ''));
+      }
+    }
+
+    return origins;
+  }
 
   canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest<HttpRequest>();

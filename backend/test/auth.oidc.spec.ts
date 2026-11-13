@@ -6,7 +6,7 @@ describe('OidcService', () => {
   const service = new OidcService();
 
   it('tạo authorization URL chứa PKCE challenge, state và nonce', () => {
-    const redirectUri = 'http://localhost:3000/callback';
+    const redirectUri = process.env.OIDC_REDIRECT_URI ?? 'http://localhost:3000/api/auth/callback';
     const { url, state } = service.createAuthorizationUrl(redirectUri);
 
     expect(url).toContain('response_type=code');
@@ -30,7 +30,7 @@ describe('OidcService', () => {
     const mockHeader = Buffer.from(JSON.stringify({ alg: 'RS256' })).toString('base64url');
     const mockPayload = Buffer.from(
       JSON.stringify({
-        iss: 'http://localhost:8080/realms/agent-builder',
+        iss: service.issuer,
         sub: 'user-sub-123',
         aud: 'agent-builder-web',
         exp: nowSec + 3600,
@@ -54,7 +54,7 @@ describe('OidcService', () => {
     const mockHeader = Buffer.from(JSON.stringify({ alg: 'RS256' })).toString('base64url');
     const mockPayload = Buffer.from(
       JSON.stringify({
-        iss: 'http://localhost:8080/realms/agent-builder',
+        iss: service.issuer,
         sub: 'user-sub-123',
         exp: nowSec - 100, // Đã hết hạn
         iat: nowSec - 200,
