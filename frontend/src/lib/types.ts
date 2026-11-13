@@ -82,4 +82,3 @@ export interface McpServerConfig {
   endpoint: string;
   status: 'connected' | 'disconnected' | 'disabled';
 }
-

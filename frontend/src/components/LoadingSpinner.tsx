@@ -30,4 +30,3 @@ export function LoadingSpinner({ message = 'Đang tải...' }: { message?: strin
     </div>
   );
 }
-

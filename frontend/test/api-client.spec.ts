@@ -79,4 +79,3 @@ describe('apiClient', () => {
     expect(headers.get('x-csrf-token')).toBe('my-csrf-code');
   });
 });
-

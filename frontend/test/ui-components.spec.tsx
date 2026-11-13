@@ -80,4 +80,3 @@ describe('UI Components', () => {
     expect(screen.getByText('Đang nạp dữ liệu...')).toBeInTheDocument();
   });
 });
-
