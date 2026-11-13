@@ -1,6 +1,7 @@
 export { DatabaseModule } from './database.module';
 export { DatabaseService } from './database.service';
 export { DATABASE_CLIENT, DATABASE_POOL, type DatabaseClient } from './database.tokens';
+export { OptimisticLockConflictError, requireOptimisticUpdate } from './optimistic-lock';
 export {
   runInTenantTransaction,
   type AuthenticatedTenantContext,
@@ -18,8 +19,15 @@ export {
 export { tenants, tenantStatus, tenantStatusValues, type TenantStatus } from './schema';
 export { users } from './schema';
 export {
+  agents,
+  agentVersions,
   aiModels,
   aiProviders,
+  auditEvents,
+  executionNodeLogs,
+  executions,
+  executionStatus,
+  executionStatusValues,
   membershipRoles,
   membershipStatus,
   membershipStatusValues,
@@ -27,6 +35,9 @@ export {
   mcpTools,
   mcpTransport,
   mcpTransportValues,
+  nodeExecutionStatus,
+  nodeExecutionStatusValues,
+  outboxEvents,
   permissions,
   providerStatus,
   providerStatusValues,
@@ -34,7 +45,11 @@ export {
   roles,
   secretReferences,
   tenantMemberships,
+  workflows,
+  workflowVersions,
+  type ExecutionStatus,
   type McpTransport,
   type MembershipStatus,
+  type NodeExecutionStatus,
   type ProviderStatus,
 } from './schema';
