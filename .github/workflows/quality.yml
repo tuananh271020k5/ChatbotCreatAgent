@@ -1,0 +1,33 @@
+name: Kiểm tra chất lượng
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Lấy mã nguồn
+        uses: actions/checkout@v4
+
+      - name: Cài Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Cài dependency từ lockfile
+        run: npm ci
+
+      - name: Kiểm tra dependency runtime
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Chạy toàn bộ cổng chất lượng
+        run: npm run quality
