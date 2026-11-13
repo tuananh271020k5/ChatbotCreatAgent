@@ -23,12 +23,14 @@ ensure_secret postgres_admin_password 24
 ensure_secret postgres_migration_password 24
 ensure_secret postgres_application_password 24
 ensure_secret keycloak_database_password 24
+ensure_secret keycloak_admin_password 24
 ensure_secret s3_access_key 10
 ensure_secret s3_secret_key 32
 
 admin_password="$(cat "$secrets_dir/postgres_admin_password")"
 migration_password="$(cat "$secrets_dir/postgres_migration_password")"
 application_password="$(cat "$secrets_dir/postgres_application_password")"
+keycloak_password="$(cat "$secrets_dir/keycloak_database_password")"
 s3_access_key="$(cat "$secrets_dir/s3_access_key")"
 s3_secret_key="$(cat "$secrets_dir/s3_secret_key")"
 
@@ -58,7 +60,7 @@ cat > "$secrets_dir/seaweed-s3.json" <<EOF
 }
 EOF
 
-mkdir -p "$secrets_dir/postgres" "$secrets_dir/seaweed" "$secrets_dir/backend"
+mkdir -p "$secrets_dir/postgres" "$secrets_dir/seaweed" "$secrets_dir/backend" "$secrets_dir/keycloak"
 
 for file_name in postgres_migration_password postgres_application_password keycloak_database_password; do
   cp "$secrets_dir/$file_name" "$secrets_dir/postgres/$file_name"
@@ -67,10 +69,13 @@ cp "$secrets_dir/seaweed-s3.json" "$secrets_dir/seaweed/seaweed-s3.json"
 for file_name in database_url migration_database_url s3_access_key s3_secret_key; do
   cp "$secrets_dir/$file_name" "$secrets_dir/backend/$file_name"
 done
+for file_name in keycloak_database_password keycloak_admin_password; do
+  cp "$secrets_dir/$file_name" "$secrets_dir/keycloak/$file_name"
+done
 
 chown -R 999:999 "$secrets_dir/postgres"
-chown -R 1000:1000 "$secrets_dir/seaweed" "$secrets_dir/backend"
-chmod 700 "$secrets_dir/postgres" "$secrets_dir/seaweed" "$secrets_dir/backend"
+chown -R 1000:1000 "$secrets_dir/seaweed" "$secrets_dir/backend" "$secrets_dir/keycloak"
+chmod 700 "$secrets_dir/postgres" "$secrets_dir/seaweed" "$secrets_dir/backend" "$secrets_dir/keycloak"
 chmod 600 "$secrets_dir"/*_password "$secrets_dir"/s3_* "$secrets_dir"/*database_url*
-chmod 600 "$secrets_dir/postgres"/* "$secrets_dir/seaweed"/* "$secrets_dir/backend"/*
+chmod 600 "$secrets_dir/postgres"/* "$secrets_dir/seaweed"/* "$secrets_dir/backend"/* "$secrets_dir/keycloak"/*
 printf 'Secret cục bộ đã sẵn sàng; giá trị hiện có được giữ nguyên.\n'
